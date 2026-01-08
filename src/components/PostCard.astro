@@ -1,0 +1,108 @@
+---
+import { formatDate } from '../lib/rss';
+
+interface Props {
+  title: string;
+  excerpt: string;
+  date: string;
+  link: string;
+  image?: string;
+  featured?: boolean;
+}
+
+const { title, excerpt, date, link, image, featured = false } = Astro.props;
+---
+
+<article class:list={[
+  'group',
+  featured ? 'featured-post' : 'standard-post'
+]}>
+  {featured ? (
+    <!-- Featured Post Layout -->
+    <a href={link} target="_blank" rel="noopener noreferrer" class="block">
+      <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+        {image && (
+          <div class="aspect-[4/3] overflow-hidden bg-surface">
+            <img
+              src={image}
+              alt=""
+              class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        )}
+        <div class={image ? '' : 'md:col-span-2'}>
+          <time class="font-sans text-sm tracking-wide text-muted">
+            {formatDate(date)}
+          </time>
+          <h2 class="mt-3 text-3xl lg:text-4xl font-serif font-medium text-charcoal leading-tight">
+            {title}
+          </h2>
+          <p class="mt-4 text-lg text-muted leading-relaxed">
+            {excerpt}
+          </p>
+          <span class="mt-6 inline-flex items-center gap-2 font-sans text-sm tracking-widest uppercase text-charcoal group-hover:text-accent transition-colors duration-300">
+            Read on Substack
+            <svg
+              class="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </a>
+  ) : (
+    <!-- Standard Post Card -->
+    <a href={link} target="_blank" rel="noopener noreferrer" class="block h-full">
+      <div class="h-full flex flex-col">
+        {image && (
+          <div class="aspect-[3/2] overflow-hidden bg-surface mb-5">
+            <img
+              src={image}
+              alt=""
+              class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        )}
+        <div class="flex-1 flex flex-col">
+          <time class="font-sans text-xs tracking-wide text-muted uppercase">
+            {formatDate(date)}
+          </time>
+          <h3 class="mt-2 text-xl font-serif font-medium text-charcoal leading-snug group-hover:text-accent transition-colors duration-300">
+            {title}
+          </h3>
+          <p class="mt-3 text-muted leading-relaxed line-clamp-3 flex-1">
+            {excerpt}
+          </p>
+          <span class="mt-4 inline-flex items-center gap-1.5 font-sans text-xs tracking-widest uppercase text-muted group-hover:text-charcoal transition-colors duration-300">
+            Read more
+            <svg
+              class="w-3 h-3 transform transition-transform duration-300 group-hover:translate-x-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </a>
+  )}
+</article>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

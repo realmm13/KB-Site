@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import PodcastCard from '../components/PodcastCard.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
+import { getLatestPosts, getLatestPodcasts } from '../lib/rss';
+
+const posts = await getLatestPosts(4);
+const podcasts = await getLatestPodcasts(2);
+const featuredPost = posts[0];
+const recentPosts = posts.slice(1);
+---
+
+<BaseLayout
+  title="Kendall Brown"
+  description="Writer and podcaster exploring identity, purpose, and the courage to listen to your inner voice."
+>
+  <!-- Hero Section -->
+  <section class="py-20 lg:py-32">
+    <div class="container">
+      <div class="max-w-3xl">
+        <p class="font-sans text-sm tracking-widest uppercase text-muted mb-6">
+          Writer & Podcaster
+        </p>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-charcoal leading-[1.1]">
+          Exploring how to listen to your inner
+          <span class="italic">still, small</span> voice.
+        </h1>
+        <p class="mt-8 text-xl text-muted leading-relaxed max-w-2xl">
+          I write about identity, purpose, and rejecting society's default rules.
+          Join me as I navigate the messy, beautiful work of becoming yourself.
+        </p>
+        <div class="mt-10 flex flex-wrap gap-4">
+          <a href="/writing" class="btn-primary">
+            Read My Writing
+          </a>
+          <a href="/about" class="btn-secondary">
+            Learn More
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Post -->
+  {featuredPost && (
+    <section class="py-16 lg:py-24 bg-surface">
+      <div class="container">
+        <p class="font-sans text-sm tracking-widest uppercase text-muted mb-8">
+          Latest Writing
+        </p>
+        <PostCard
+          title={featuredPost.title}
+          excerpt={featuredPost.excerpt}
+          date={featuredPost.pubDate}
+          link={featuredPost.link}
+          image={featuredPost.image}
+          featured={true}
+        />
+      </div>
+    </section>
+  )}
+
+  <!-- Recent Posts Grid -->
+  {recentPosts.length > 0 && (
+    <section class="py-16 lg:py-24">
+      <div class="container">
+        <div class="flex items-center justify-between mb-10">
+          <h2 class="text-2xl font-serif font-medium text-charcoal">
+            Recent Writing
+          </h2>
+          <a
+            href="/writing"
+            class="font-sans text-sm tracking-widest uppercase text-muted hover:text-charcoal transition-colors duration-300"
+          >
+            View All
+          </a>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          {recentPosts.map((post) => (
+            <PostCard
+              title={post.title}
+              excerpt={post.excerpt}
+              date={post.pubDate}
+              link={post.link}
+              image={post.image}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Podcasts Section -->
+  {podcasts.length > 0 && (
+    <section class="py-16 lg:py-24 bg-surface">
+      <div class="container">
+        <div class="flex items-center justify-between mb-10">
+          <h2 class="text-2xl font-serif font-medium text-charcoal">
+            Podcast Episodes
+          </h2>
+          <a
+            href="/podcasts"
+            class="font-sans text-sm tracking-widest uppercase text-muted hover:text-charcoal transition-colors duration-300"
+          >
+            View All
+          </a>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-6">
+          {podcasts.map((episode) => (
+            <PodcastCard
+              title={episode.title}
+              excerpt={episode.excerpt}
+              date={episode.pubDate}
+              link={episode.link}
+              duration={episode.duration}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Subscribe CTA -->
+  <section class="py-20 lg:py-28">
+    <div class="container">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl lg:text-4xl font-serif font-medium text-charcoal">
+          Join the conversation
+        </h2>
+        <p class="mt-4 text-lg text-muted">
+          Subscribe to receive new essays and podcast episodes in your inbox.
+        </p>
+        <div class="mt-8">
+          <SubscribeForm />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

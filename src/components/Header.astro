@@ -1,0 +1,168 @@
+---
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = Astro.url.pathname } = Astro.props;
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/podcasts', label: 'Podcasts' },
+  { href: '/contact', label: 'Contact' },
+];
+
+function isActive(href: string, current: string): boolean {
+  if (href === '/') return current === '/';
+  return current.startsWith(href);
+}
+---
+
+<header class="relative">
+  <div class="container py-8 lg:py-12">
+    <nav class="flex items-center justify-between">
+      <!-- Logo/Name -->
+      <a
+        href="/"
+        class="group relative"
+      >
+        <span class="text-2xl lg:text-3xl font-serif font-medium tracking-tight text-charcoal">
+          Kendall Brown
+        </span>
+        <span class="absolute -bottom-1 left-0 w-0 h-px bg-charcoal transition-all duration-500 ease-out group-hover:w-full"></span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <ul class="hidden md:flex items-center gap-8 lg:gap-12">
+        {navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class:list={[
+                'relative font-sans text-sm tracking-widest uppercase transition-colors duration-300',
+                isActive(link.href, currentPath)
+                  ? 'text-charcoal'
+                  : 'text-muted hover:text-charcoal',
+              ]}
+            >
+              {link.label}
+              {isActive(link.href, currentPath) && (
+                <span class="absolute -bottom-1 left-0 w-full h-px bg-charcoal"></span>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <!-- Mobile Menu Button -->
+      <button
+        type="button"
+        class="md:hidden relative w-8 h-8 flex items-center justify-center"
+        aria-label="Toggle menu"
+        id="menu-toggle"
+      >
+        <div class="menu-icon">
+          <span class="block w-6 h-px bg-charcoal transition-all duration-300 origin-center"></span>
+          <span class="block w-6 h-px bg-charcoal mt-1.5 transition-all duration-300 origin-center"></span>
+        </div>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Subtle separator -->
+  <div class="absolute bottom-0 left-0 right-0 h-px bg-border"></div>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="fixed inset-0 bg-cream z-50 transform translate-x-full transition-transform duration-500 ease-out md:hidden"
+  >
+    <div class="container py-8">
+      <div class="flex items-center justify-between mb-16">
+        <span class="text-2xl font-serif font-medium tracking-tight text-charcoal">
+          Kendall Brown
+        </span>
+        <button
+          type="button"
+          class="relative w-8 h-8 flex items-center justify-center"
+          aria-label="Close menu"
+          id="menu-close"
+        >
+          <span class="block w-6 h-px bg-charcoal rotate-45 absolute"></span>
+          <span class="block w-6 h-px bg-charcoal -rotate-45 absolute"></span>
+        </button>
+      </div>
+
+      <nav>
+        <ul class="space-y-6">
+          {navLinks.map((link, index) => (
+            <li
+              class="mobile-nav-item opacity-0 transform translate-y-4"
+              style={`transition-delay: ${index * 75}ms`}
+            >
+              <a
+                href={link.href}
+                class:list={[
+                  'block text-3xl font-serif transition-colors duration-300',
+                  isActive(link.href, currentPath)
+                    ? 'text-charcoal'
+                    : 'text-muted hover:text-charcoal',
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="absolute bottom-8 left-6 right-6">
+        <a
+          href="https://stillsmall.substack.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-sans text-sm tracking-widest uppercase text-muted hover:text-charcoal transition-colors duration-300"
+        >
+          Subscribe on Substack
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .menu-open #mobile-menu {
+    transform: translateX(0);
+  }
+
+  .menu-open .mobile-nav-item {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+</style>
+
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuClose = document.getElementById('menu-close');
+  const html = document.documentElement;
+
+  menuToggle?.addEventListener('click', () => {
+    html.classList.add('menu-open');
+    document.body.style.overflow = 'hidden';
+  });
+
+  menuClose?.addEventListener('click', () => {
+    html.classList.remove('menu-open');
+    document.body.style.overflow = '';
+  });
+
+  // Close on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && html.classList.contains('menu-open')) {
+      html.classList.remove('menu-open');
+      document.body.style.overflow = '';
+    }
+  });
+</script>

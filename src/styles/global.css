@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream text-charcoal antialiased font-serif;
+  }
+
+  ::selection {
+    @apply bg-accent/20 text-charcoal;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-5xl mx-auto px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-charcoal text-cream
+           font-sans text-sm font-medium tracking-wide uppercase
+           hover:bg-charcoal/90 transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 border border-charcoal text-charcoal
+           font-sans text-sm font-medium tracking-wide uppercase
+           hover:bg-charcoal hover:text-cream transition-colors duration-200;
+  }
+
+  .link {
+    @apply text-charcoal underline underline-offset-4 decoration-border
+           hover:decoration-charcoal transition-colors duration-200;
+  }
+
+  .link-accent {
+    @apply text-accent hover:text-accent/80 transition-colors duration-200;
+  }
+}

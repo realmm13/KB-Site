@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PodcastCard from '../../components/PodcastCard.astro';
+import { getPodcasts } from '../../lib/rss';
+
+const podcasts = await getPodcasts();
+---
+
+<BaseLayout
+  title="Podcasts"
+  description="Conversations about unconventional choices, authenticity, and listening to your inner voice."
+>
+  <section class="py-16 lg:py-24">
+    <div class="container">
+      <!-- Header -->
+      <div class="max-w-2xl mb-12 lg:mb-16">
+        <p class="font-sans text-sm tracking-widest uppercase text-muted mb-4">
+          Podcast
+        </p>
+        <h1 class="text-4xl lg:text-5xl font-serif font-medium text-charcoal leading-tight">
+          Still Small Podcast
+        </h1>
+        <p class="mt-6 text-lg text-muted leading-relaxed">
+          Conversations with people about the unconventional choices they've made—from
+          decisions about children and career to relationships and creativity.
+        </p>
+      </div>
+
+      <!-- Episodes List -->
+      {podcasts.length > 0 ? (
+        <div class="space-y-4">
+          {podcasts.map((episode) => (
+            <PodcastCard
+              title={episode.title}
+              excerpt={episode.excerpt}
+              date={episode.pubDate}
+              link={episode.link}
+              duration={episode.duration}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-muted text-lg">
+            No podcast episodes available yet. Check back soon!
+          </p>
+          <a
+            href="https://stillsmall.substack.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-4 inline-flex items-center gap-2 font-sans text-sm tracking-widest uppercase text-charcoal hover:text-accent transition-colors duration-300"
+          >
+            Visit Substack
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+            </svg>
+          </a>
+        </div>
+      )}
+
+      <!-- Subscribe Note -->
+      <div class="mt-16 p-8 lg:p-10 bg-surface text-center">
+        <h2 class="text-xl font-serif font-medium text-charcoal">
+          Listen on your favorite platform
+        </h2>
+        <p class="mt-3 text-muted">
+          The podcast is available wherever you listen to podcasts,
+          or you can listen directly on Substack.
+        </p>
+        <a
+          href="https://stillsmall.substack.com/podcast"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-6 btn-primary inline-flex"
+        >
+          Listen on Substack
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

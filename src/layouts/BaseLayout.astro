@@ -1,0 +1,115 @@
+---
+import SEO from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedDate?: string;
+}
+
+const { title, description, image, type, publishedDate } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <SEO
+      title={title}
+      description={description}
+      image={image}
+      type={type}
+      publishedDate={publishedDate}
+    />
+
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Page transition overlay -->
+    <div
+      id="page-transition"
+      class="fixed inset-0 bg-cream z-[100] pointer-events-none opacity-0 transition-opacity duration-300"
+    ></div>
+
+    <Header />
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      // Subtle page load animation
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('loaded');
+      });
+
+      // Page transition for internal links
+      document.querySelectorAll('a[href^="/"]').forEach((link) => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (href && !e.metaKey && !e.ctrlKey) {
+            e.preventDefault();
+            const transition = document.getElementById('page-transition');
+            if (transition) {
+              transition.style.opacity = '1';
+              setTimeout(() => {
+                window.location.href = href;
+              }, 200);
+            } else {
+              window.location.href = href;
+            }
+          }
+        });
+      });
+    </script>
+
+    <style is:global>
+      /* Initial load state */
+      body:not(.loaded) main {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      /* Loaded state with smooth transition */
+      body.loaded main {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+
+      /* Smooth scrollbar for a refined feel */
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #e5e2d9 transparent;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: #e5e2d9;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #d0cdc4;
+      }
+    </style>
+  </body>
+</html>

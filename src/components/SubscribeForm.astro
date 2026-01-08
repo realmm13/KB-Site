@@ -1,0 +1,41 @@
+---
+interface Props {
+  variant?: 'default' | 'minimal';
+}
+
+const { variant = 'default' } = Astro.props;
+---
+
+{variant === 'default' ? (
+  <div class="subscribe-form max-w-md mx-auto">
+    <iframe
+      src="https://stillsmall.substack.com/embed"
+      width="100%"
+      height="150"
+      style="border:none; background:transparent;"
+      frameborder="0"
+      scrolling="no"
+      title="Subscribe to Still Small"
+    ></iframe>
+  </div>
+) : (
+  <!-- Minimal variant - just a link -->
+  <a
+    href="https://stillsmall.substack.com/subscribe"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn-primary"
+  >
+    Subscribe
+  </a>
+)}
+
+<style>
+  .subscribe-form {
+    /* Override Substack's default styling to match our theme */
+  }
+
+  .subscribe-form iframe {
+    max-width: 100%;
+  }
+</style>
