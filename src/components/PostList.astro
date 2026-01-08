@@ -1,0 +1,35 @@
+---
+import { formatDate } from '../lib/rss';
+import type { SubstackPost } from '../lib/types';
+
+interface Props {
+  posts: SubstackPost[];
+}
+
+const { posts } = Astro.props;
+---
+
+<div class="post-list divide-y divide-border">
+  {posts.map((post) => (
+    <article class="group py-6 first:pt-0 last:pb-0">
+      <a
+        href={post.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="block"
+      >
+        <time class="font-sans text-xs tracking-widest uppercase text-muted">
+          {formatDate(post.pubDate)}
+        </time>
+        <h3 class="mt-2 text-xl lg:text-2xl font-serif font-medium text-charcoal leading-snug group-hover:text-accent transition-colors duration-300">
+          {post.title}
+        </h3>
+        {post.excerpt && (
+          <p class="mt-2 text-muted leading-relaxed">
+            {post.excerpt}
+          </p>
+        )}
+      </a>
+    </article>
+  ))}
+</div>

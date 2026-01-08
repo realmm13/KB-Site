@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Topics organized by category, linking to Substack tag pages
+const topicGroups = [
+  {
+    name: 'Life & Identity',
+    topics: [
+      { label: 'Motherhood', slug: 'motherhood' },
+      { label: 'Family', slug: 'family' },
+      { label: 'Work', slug: 'work' },
+      { label: 'Friendship', slug: 'friendship' },
+      { label: 'Feminism', slug: 'feminism' },
+    ],
+  },
+  {
+    name: 'Mind & Spirit',
+    topics: [
+      { label: 'Writing', slug: 'writing' },
+      { label: 'Inspiration', slug: 'inspiration' },
+      { label: 'Spirituality', slug: 'spirituality' },
+      { label: 'Fear', slug: 'fear' },
+      { label: 'Depression', slug: 'depression' },
+      { label: 'Memories', slug: 'memories' },
+    ],
+  },
+  {
+    name: 'Body & Wellness',
+    topics: [
+      { label: 'Health', slug: 'health' },
+      { label: 'Fitness', slug: 'fitness' },
+      { label: 'Running', slug: 'running' },
+      { label: 'Alcohol', slug: 'alcohol' },
+    ],
+  },
+  {
+    name: 'Culture & Interests',
+    topics: [
+      { label: 'Books', slug: 'books' },
+      { label: 'Movies', slug: 'movies' },
+      { label: 'Art', slug: 'art' },
+      { label: 'Beauty', slug: 'beauty' },
+      { label: 'Food', slug: 'food' },
+      { label: 'Coffee', slug: 'coffee' },
+    ],
+  },
+  {
+    name: 'Life Events',
+    topics: [
+      { label: 'Wedding', slug: 'wedding' },
+      { label: 'Death', slug: 'death' },
+    ],
+  },
+];
+
+const SUBSTACK_BASE = 'https://stillsmall.substack.com/t';
+---
+
+<BaseLayout
+  title="Topics"
+  description="Browse Kendall's writing by topic - from motherhood and identity to books and creativity."
+>
+  <section class="py-16 lg:py-24">
+    <div class="container">
+      <!-- Header -->
+      <div class="max-w-2xl mb-12 lg:mb-16">
+        <p class="font-sans text-sm tracking-widest uppercase text-muted mb-4">
+          Topics
+        </p>
+        <h1 class="text-4xl lg:text-5xl font-serif font-medium text-charcoal leading-tight">
+          Browse by Topic
+        </h1>
+        <p class="mt-6 text-lg text-muted leading-relaxed">
+          Explore essays and reflections organized by theme. Each topic links to
+          a curated collection on Substack.
+        </p>
+      </div>
+
+      <!-- Topic Groups -->
+      <div class="space-y-12 lg:space-y-16">
+        {topicGroups.map((group) => (
+          <div>
+            <h2 class="text-sm font-sans tracking-widest uppercase text-muted mb-6">
+              {group.name}
+            </h2>
+            <div class="flex flex-wrap gap-3">
+              {group.topics.map((topic) => (
+                <a
+                  href={`${SUBSTACK_BASE}/${topic.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group inline-flex items-center gap-2 px-5 py-3 border border-border hover:border-charcoal text-charcoal transition-all duration-300"
+                >
+                  <span class="font-serif text-lg">{topic.label}</span>
+                  <svg
+                    class="w-3.5 h-3.5 text-muted group-hover:text-charcoal transition-colors duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Note -->
+      <div class="mt-16 pt-12 border-t border-border">
+        <p class="text-muted text-center">
+          All posts are published on{' '}
+          <a
+            href="https://stillsmall.substack.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-charcoal hover:text-accent transition-colors duration-300 underline underline-offset-4"
+          >
+            Still Small
+          </a>
+          {' '}on Substack.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
