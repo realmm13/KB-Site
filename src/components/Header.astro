@@ -22,7 +22,7 @@ function isActive(href: string, current: string): boolean {
 
 <header class="relative">
   <div class="container py-8 lg:py-12">
-    <nav class="flex items-center justify-between">
+    <nav class="flex items-baseline justify-between">
       <!-- Logo/Name -->
       <a
         href="/"
@@ -35,7 +35,7 @@ function isActive(href: string, current: string): boolean {
       </a>
 
       <!-- Desktop Navigation -->
-      <ul class="hidden md:flex items-center gap-8 lg:gap-12">
+      <ul class="hidden md:flex items-baseline gap-8 lg:gap-12">
         {navLinks.map((link) => (
           <li>
             <a
