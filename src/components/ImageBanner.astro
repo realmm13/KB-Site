@@ -1,0 +1,35 @@
+---
+interface Props {
+  images: {
+    src: string;
+    alt: string;
+  }[];
+}
+
+const { images } = Astro.props;
+---
+
+<section class="w-full overflow-hidden">
+  <div class="flex h-[280px] md:h-[360px] lg:h-[440px]">
+    {images.map((image, index) => (
+      <div
+        class:list={[
+          'relative flex-shrink-0 overflow-hidden',
+          // Vary widths for visual interest
+          index === 0 ? 'w-[15%] md:w-[14%]' : '',
+          index === 1 ? 'w-[22%] md:w-[20%]' : '',
+          index === 2 ? 'w-[26%] md:w-[24%]' : '',
+          index === 3 ? 'w-[22%] md:w-[22%]' : '',
+          index === 4 ? 'w-[15%] md:w-[20%]' : '',
+        ]}
+      >
+        <img
+          src={image.src}
+          alt={image.alt}
+          class="w-full h-full object-cover"
+          loading="eager"
+        />
+      </div>
+    ))}
+  </div>
+</section>

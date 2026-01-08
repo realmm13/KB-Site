@@ -28,7 +28,7 @@ function isActive(href: string, current: string): boolean {
         href="/"
         class="group relative"
       >
-        <span class="text-2xl lg:text-3xl font-serif font-medium tracking-tight text-charcoal">
+        <span class="text-2xl lg:text-3xl font-serif font-medium tracking-tight text-charcoal leading-none">
           Kendall Brown
         </span>
         <span class="absolute -bottom-1 left-0 w-0 h-px bg-charcoal transition-all duration-500 ease-out group-hover:w-full"></span>
@@ -41,7 +41,7 @@ function isActive(href: string, current: string): boolean {
             <a
               href={link.href}
               class:list={[
-                'relative font-sans text-sm tracking-widest uppercase transition-colors duration-300',
+                'relative font-sans text-sm tracking-widest uppercase leading-none transition-colors duration-300',
                 isActive(link.href, currentPath)
                   ? 'text-charcoal'
                   : 'text-muted hover:text-charcoal',
