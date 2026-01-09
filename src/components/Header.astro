@@ -77,9 +77,9 @@ function isActive(href: string, current: string): boolean {
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class="fixed inset-0 bg-cream z-50 transform translate-x-full transition-transform duration-500 ease-out md:hidden"
+    class="fixed inset-0 bg-cream z-50 transform translate-x-full transition-transform duration-500 ease-out md:hidden overflow-y-auto overscroll-contain"
   >
-    <div class="container py-8">
+    <div class="container py-8 min-h-full">
       <div class="flex items-center justify-between mb-16">
         <span class="text-2xl font-serif font-medium tracking-tight text-charcoal">
           Kendall Brown
@@ -133,6 +133,10 @@ function isActive(href: string, current: string): boolean {
 </header>
 
 <style>
+  #mobile-menu {
+    -webkit-overflow-scrolling: touch;
+  }
+
   .menu-open #mobile-menu {
     transform: translateX(0);
   }
@@ -142,28 +146,58 @@ function isActive(href: string, current: string): boolean {
     transform: translateY(0);
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
   }
+
+  /* Prevent background scroll on iOS when menu is open */
+  .menu-open {
+    touch-action: none;
+  }
+
+  .menu-open #mobile-menu {
+    touch-action: pan-y;
+  }
 </style>
 
 <script>
   const menuToggle = document.getElementById('menu-toggle');
   const menuClose = document.getElementById('menu-close');
+  const mobileMenu = document.getElementById('mobile-menu');
   const html = document.documentElement;
+  let scrollPosition = 0;
 
-  menuToggle?.addEventListener('click', () => {
+  function openMenu() {
+    scrollPosition = window.scrollY;
     html.classList.add('menu-open');
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosition}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
     document.body.style.overflow = 'hidden';
-  });
+  }
 
-  menuClose?.addEventListener('click', () => {
+  function closeMenu() {
     html.classList.remove('menu-open');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
     document.body.style.overflow = '';
+    window.scrollTo(0, scrollPosition);
+  }
+
+  menuToggle?.addEventListener('click', openMenu);
+  menuClose?.addEventListener('click', closeMenu);
+
+  // Close menu when clicking nav links
+  mobileMenu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      closeMenu();
+    });
   });
 
   // Close on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && html.classList.contains('menu-open')) {
-      html.classList.remove('menu-open');
-      document.body.style.overflow = '';
+      closeMenu();
     }
   });
 </script>
