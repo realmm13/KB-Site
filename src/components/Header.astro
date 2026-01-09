@@ -86,12 +86,12 @@ function isActive(href: string, current: string): boolean {
         </span>
         <button
           type="button"
-          class="relative w-8 h-8 flex items-center justify-center"
+          class="relative w-11 h-11 flex items-center justify-center"
           aria-label="Close menu"
           id="menu-close"
         >
-          <span class="block w-6 h-px bg-charcoal rotate-45 absolute"></span>
-          <span class="block w-6 h-px bg-charcoal -rotate-45 absolute"></span>
+          <span class="block w-6 h-px bg-charcoal rotate-45 absolute pointer-events-none"></span>
+          <span class="block w-6 h-px bg-charcoal -rotate-45 absolute pointer-events-none"></span>
         </button>
       </div>
 
@@ -138,6 +138,11 @@ function isActive(href: string, current: string): boolean {
     pointer-events: auto !important;
   }
 
+  .menu-open #menu-toggle {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
   .menu-open .mobile-nav-item {
     opacity: 1 !important;
     transform: translateY(0) !important;
@@ -149,29 +154,36 @@ function isActive(href: string, current: string): boolean {
   document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.getElementById('menu-toggle');
     const menuClose = document.getElementById('menu-close');
+    const mobileMenu = document.getElementById('mobile-menu');
     const html = document.documentElement;
+
+    function closeMenu() {
+      html.classList.remove('menu-open');
+      document.body.style.overflow = '';
+    }
 
     if (menuToggle) {
       menuToggle.addEventListener('click', function() {
-        console.log('Menu toggle clicked');
         html.classList.add('menu-open');
         document.body.style.overflow = 'hidden';
       });
     }
 
     if (menuClose) {
-      menuClose.addEventListener('click', function() {
-        console.log('Menu close clicked');
-        html.classList.remove('menu-open');
-        document.body.style.overflow = '';
+      menuClose.addEventListener('click', closeMenu);
+    }
+
+    // Close menu when clicking nav links
+    if (mobileMenu) {
+      mobileMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
       });
     }
 
     // Close on escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && html.classList.contains('menu-open')) {
-        html.classList.remove('menu-open');
-        document.body.style.overflow = '';
+        closeMenu();
       }
     });
   });
