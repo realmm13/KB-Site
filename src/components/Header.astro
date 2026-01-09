@@ -146,58 +146,28 @@ function isActive(href: string, current: string): boolean {
     transform: translateY(0);
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
   }
-
-  /* Prevent background scroll on iOS when menu is open */
-  .menu-open {
-    touch-action: none;
-  }
-
-  .menu-open #mobile-menu {
-    touch-action: pan-y;
-  }
 </style>
 
 <script>
   const menuToggle = document.getElementById('menu-toggle');
   const menuClose = document.getElementById('menu-close');
-  const mobileMenu = document.getElementById('mobile-menu');
   const html = document.documentElement;
-  let scrollPosition = 0;
 
-  function openMenu() {
-    scrollPosition = window.scrollY;
+  menuToggle?.addEventListener('click', () => {
     html.classList.add('menu-open');
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollPosition}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
     document.body.style.overflow = 'hidden';
-  }
+  });
 
-  function closeMenu() {
+  menuClose?.addEventListener('click', () => {
     html.classList.remove('menu-open');
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
     document.body.style.overflow = '';
-    window.scrollTo(0, scrollPosition);
-  }
-
-  menuToggle?.addEventListener('click', openMenu);
-  menuClose?.addEventListener('click', closeMenu);
-
-  // Close menu when clicking nav links
-  mobileMenu?.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      closeMenu();
-    });
   });
 
   // Close on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && html.classList.contains('menu-open')) {
-      closeMenu();
+      html.classList.remove('menu-open');
+      document.body.style.overflow = '';
     }
   });
 </script>
