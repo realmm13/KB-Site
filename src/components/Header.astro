@@ -59,13 +59,13 @@ function isActive(href: string, current: string): boolean {
       <!-- Mobile Menu Button -->
       <button
         type="button"
-        class="md:hidden relative w-8 h-8 flex items-center justify-center"
+        class="md:hidden relative w-11 h-11 flex items-center justify-center z-[60]"
         aria-label="Toggle menu"
         id="menu-toggle"
       >
-        <div class="menu-icon">
-          <span class="block w-6 h-px bg-charcoal transition-all duration-300 origin-center"></span>
-          <span class="block w-6 h-px bg-charcoal mt-1.5 transition-all duration-300 origin-center"></span>
+        <div class="pointer-events-none">
+          <span class="block w-6 h-px bg-charcoal"></span>
+          <span class="block w-6 h-px bg-charcoal mt-1.5"></span>
         </div>
       </button>
     </nav>
@@ -77,7 +77,7 @@ function isActive(href: string, current: string): boolean {
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class="fixed inset-0 bg-cream z-50 transform translate-x-full transition-transform duration-500 ease-out md:hidden overflow-y-auto overscroll-contain"
+    class="fixed inset-0 bg-cream z-40 translate-x-full transition-transform duration-500 ease-out md:hidden overflow-y-auto pointer-events-none"
   >
     <div class="container py-8 min-h-full">
       <div class="flex items-center justify-between mb-16">
@@ -132,42 +132,47 @@ function isActive(href: string, current: string): boolean {
   </div>
 </header>
 
-<style>
-  #mobile-menu {
-    -webkit-overflow-scrolling: touch;
-  }
-
+<style is:global>
   .menu-open #mobile-menu {
-    transform: translateX(0);
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
   }
 
   .menu-open .mobile-nav-item {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: translateY(0) !important;
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
   }
 </style>
 
-<script>
-  const menuToggle = document.getElementById('menu-toggle');
-  const menuClose = document.getElementById('menu-close');
-  const html = document.documentElement;
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const menuClose = document.getElementById('menu-close');
+    const html = document.documentElement;
 
-  menuToggle?.addEventListener('click', () => {
-    html.classList.add('menu-open');
-    document.body.style.overflow = 'hidden';
-  });
-
-  menuClose?.addEventListener('click', () => {
-    html.classList.remove('menu-open');
-    document.body.style.overflow = '';
-  });
-
-  // Close on escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && html.classList.contains('menu-open')) {
-      html.classList.remove('menu-open');
-      document.body.style.overflow = '';
+    if (menuToggle) {
+      menuToggle.addEventListener('click', function() {
+        console.log('Menu toggle clicked');
+        html.classList.add('menu-open');
+        document.body.style.overflow = 'hidden';
+      });
     }
+
+    if (menuClose) {
+      menuClose.addEventListener('click', function() {
+        console.log('Menu close clicked');
+        html.classList.remove('menu-open');
+        document.body.style.overflow = '';
+      });
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && html.classList.contains('menu-open')) {
+        html.classList.remove('menu-open');
+        document.body.style.overflow = '';
+      }
+    });
   });
 </script>
