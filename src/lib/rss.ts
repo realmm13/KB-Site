@@ -185,15 +185,16 @@ async function fetchPostMetadata(url: string): Promise<SubstackPost | null> {
   }
 }
 
-// Known podcast episode URL patterns to exclude
-const PODCAST_URL_PATTERNS = [
+// URL patterns to exclude (podcasts and non-blog posts)
+const EXCLUDED_URL_PATTERNS = [
   '/p/episode-',
   '/p/7-maintaining-awe-and-wonder',
   '/p/6-the-unconventional-route',
+  '/p/welcome-to-still-small',
 ];
 
-function isPodcastUrl(url: string): boolean {
-  return PODCAST_URL_PATTERNS.some((pattern) => url.includes(pattern));
+function isExcludedUrl(url: string): boolean {
+  return EXCLUDED_URL_PATTERNS.some((pattern) => url.includes(pattern));
 }
 
 export async function getPosts(): Promise<SubstackPost[]> {
@@ -209,7 +210,7 @@ export async function getPosts(): Promise<SubstackPost[]> {
   // Find URLs not in RSS feed
   const rssUrls = new Set(rssPosts.map((p) => p.link));
   const olderUrls = sitemapUrls.filter(
-    (url) => !rssUrls.has(url) && !isPodcastUrl(url)
+    (url) => !rssUrls.has(url) && !isExcludedUrl(url)
   );
 
   // Fetch metadata for older posts (in parallel, batched)
