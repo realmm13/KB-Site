@@ -2,6 +2,7 @@ import Parser from 'rss-parser';
 import type { SubstackPost, PodcastEpisode } from './types';
 
 const RSS_URL = 'https://stillsmall.substack.com/feed';
+const SITEMAP_URL = 'https://stillsmall.substack.com/sitemap.xml';
 
 interface CustomItem {
   title?: string;
@@ -74,9 +75,22 @@ function getImageForPost(item: CustomItem): string | undefined {
   return undefined;
 }
 
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec));
+}
+
 function cleanExcerpt(snippet: string | undefined, maxLength = 200): string {
   if (!snippet) return '';
-  const cleaned = snippet.replace(/\s+/g, ' ').trim();
+  const decoded = decodeHtmlEntities(snippet);
+  const cleaned = decoded.replace(/\s+/g, ' ').trim();
   if (cleaned.length <= maxLength) return cleaned;
   return cleaned.substring(0, maxLength).replace(/\s+\S*$/, '') + '...';
 }
@@ -117,11 +131,106 @@ export async function fetchSubstackFeed(): Promise<CustomItem[]> {
   }
 }
 
+async function fetchSitemapUrls(): Promise<string[]> {
+  try {
+    const response = await fetch(SITEMAP_URL);
+    const xml = await response.text();
+    const urls: string[] = [];
+    const regex = /<loc>(https:\/\/stillsmall\.substack\.com\/p\/[^<]+)<\/loc>/g;
+    let match;
+    while ((match = regex.exec(xml)) !== null) {
+      urls.push(match[1]);
+    }
+    return urls;
+  } catch (error) {
+    console.error('Error fetching sitemap:', error);
+    return [];
+  }
+}
+
+async function fetchPostMetadata(url: string): Promise<SubstackPost | null> {
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+
+    // Extract title from og:title or title tag
+    const titleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i) ||
+                       html.match(/<title>([^<]+)<\/title>/i);
+    const title = titleMatch ? titleMatch[1].replace(' - Still Small', '').trim() : 'Untitled';
+
+    // Extract date from article:published_time or datePublished
+    const dateMatch = html.match(/<meta[^>]*property="article:published_time"[^>]*content="([^"]+)"/i) ||
+                      html.match(/"datePublished"\s*:\s*"([^"]+)"/);
+    const pubDate = dateMatch ? dateMatch[1] : new Date().toISOString();
+
+    // Extract description/excerpt
+    const descMatch = html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]+)"/i) ||
+                      html.match(/<meta[^>]*name="description"[^>]*content="([^"]+)"/i);
+    const excerpt = descMatch ? cleanExcerpt(descMatch[1]) : '';
+
+    // Extract image
+    const imgMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+    const image = imgMatch ? imgMatch[1] : undefined;
+
+    return {
+      title,
+      link: url,
+      pubDate,
+      excerpt,
+      content: '',
+      image,
+    };
+  } catch (error) {
+    console.error(`Error fetching post metadata for ${url}:`, error);
+    return null;
+  }
+}
+
+// Known podcast episode URL patterns to exclude
+const PODCAST_URL_PATTERNS = [
+  '/p/episode-',
+  '/p/7-maintaining-awe-and-wonder',
+  '/p/6-the-unconventional-route',
+];
+
+function isPodcastUrl(url: string): boolean {
+  return PODCAST_URL_PATTERNS.some((pattern) => url.includes(pattern));
+}
+
 export async function getPosts(): Promise<SubstackPost[]> {
-  const items = await fetchSubstackFeed();
-  return items
+  // Get posts from RSS feed (most recent 20)
+  const rssItems = await fetchSubstackFeed();
+  const rssPosts = rssItems
     .filter((item) => !isPodcastEpisode(item))
     .map(transformToPost);
+
+  // Get all post URLs from sitemap
+  const sitemapUrls = await fetchSitemapUrls();
+
+  // Find URLs not in RSS feed
+  const rssUrls = new Set(rssPosts.map((p) => p.link));
+  const olderUrls = sitemapUrls.filter(
+    (url) => !rssUrls.has(url) && !isPodcastUrl(url)
+  );
+
+  // Fetch metadata for older posts (in parallel, batched)
+  const olderPosts: SubstackPost[] = [];
+  const batchSize = 10;
+  for (let i = 0; i < olderUrls.length; i += batchSize) {
+    const batch = olderUrls.slice(i, i + batchSize);
+    const results = await Promise.all(batch.map(fetchPostMetadata));
+    for (const post of results) {
+      if (post && !isPodcastEpisode({ title: post.title })) {
+        olderPosts.push(post);
+      }
+    }
+  }
+
+  // Combine and sort by date (newest first)
+  const allPosts = [...rssPosts, ...olderPosts];
+  return allPosts.sort(
+    (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+  );
 }
 
 // Static podcast episodes (from 2023, not in main RSS feed)
