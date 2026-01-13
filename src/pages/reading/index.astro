@@ -6,9 +6,18 @@ import { getFeaturedBooks, getAllBooks } from '../../lib/books';
 
 const featuredBooks = getFeaturedBooks(6);
 const allBooks = getAllBooks();
-const remainingBooks = allBooks.filter(
-  book => !featuredBooks.some(f => f.id === book.id)
-);
+// Sort all books by rating (highest first), then by date read
+const sortedByRating = [...allBooks].sort((a, b) => {
+  // First sort by rating (descending)
+  if (b.myRating !== a.myRating) {
+    return b.myRating - a.myRating;
+  }
+  // Then by date read (most recent first)
+  if (a.dateRead && b.dateRead) {
+    return new Date(b.dateRead).getTime() - new Date(a.dateRead).getTime();
+  }
+  return 0;
+});
 ---
 
 <BaseLayout
@@ -47,7 +56,7 @@ const remainingBooks = allBooks.filter(
       )}
 
       <!-- Full Book List -->
-      {remainingBooks.length > 0 && (
+      {sortedByRating.length > 0 && (
         <div id="all-books" class="scroll-mt-8">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 class="text-xl font-serif font-medium text-charcoal">
@@ -78,7 +87,7 @@ const remainingBooks = allBooks.filter(
           </div>
 
           <div id="books-list" class="border-t border-border">
-            {remainingBooks.map((book) => (
+            {sortedByRating.map((book) => (
               <BookListItem book={book} />
             ))}
           </div>
