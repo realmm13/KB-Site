@@ -1,6 +1,6 @@
 ---
 import type { Book } from '../lib/types';
-import { formatShortDate, truncateReview, getAmazonSearchUrl } from '../lib/books';
+import { formatShortDate, getAmazonSearchUrl } from '../lib/books';
 
 interface Props {
   book: Book;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { book, index } = Astro.props;
-const reviewExcerpt = truncateReview(book.review, 200);
+const reviewText = book.review || '';
 const amazonUrl = getAmazonSearchUrl(book.title, book.author);
 ---
 
@@ -52,10 +52,10 @@ const amazonUrl = getAmazonSearchUrl(book.title, book.author);
         {book.myRating > 0 ? `${book.myRating} Stars` : 'Unrated'}
       </p>
 
-      <!-- Review Excerpt -->
-      {reviewExcerpt && (
-        <p class="mt-3 text-sm text-muted leading-relaxed line-clamp-4 flex-1">
-          {reviewExcerpt}
+      <!-- Review -->
+      {reviewText && (
+        <p class="mt-3 text-sm text-muted leading-relaxed flex-1">
+          {reviewText}
         </p>
       )}
     </div>
