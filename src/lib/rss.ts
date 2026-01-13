@@ -35,8 +35,7 @@ function isPodcastEpisode(item: CustomItem): boolean {
   // Detect podcast episodes by headphone emoji or "Episode" pattern in title
   return (
     title.includes('🎧') ||
-    /episode\s*\d/i.test(title) ||
-    /^\d+\.\s/.test(title) // Matches "1. Episode title" format
+    /episode\s*\d/i.test(title)
   );
 }
 
