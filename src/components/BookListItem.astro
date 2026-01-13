@@ -1,0 +1,71 @@
+---
+import type { Book } from '../lib/types';
+import { formatShortDate, getAmazonSearchUrl } from '../lib/books';
+
+interface Props {
+  book: Book;
+}
+
+const { book } = Astro.props;
+const hasReview = book.review && book.review.trim().length > 0;
+const reviewText = book.review || '';
+const isLongReview = reviewText.length > 300;
+const truncatedReview = isLongReview
+  ? reviewText.substring(0, 300).replace(/\s+\S*$/, '') + '...'
+  : reviewText;
+const amazonUrl = getAmazonSearchUrl(book.title, book.author);
+
+// Generate star display
+const stars = book.myRating > 0 ? '★'.repeat(book.myRating) + '☆'.repeat(5 - book.myRating) : '';
+---
+
+<article class="book-item py-5 border-b border-border last:border-b-0" data-title={book.title.toLowerCase()} data-author={book.author.toLowerCase()} data-rating={book.myRating}>
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+    <!-- Title & Author -->
+    <div class="min-w-0 flex-1">
+      <h3 class="text-base font-serif">
+        <a href={amazonUrl} target="_blank" rel="noopener noreferrer" class="text-accent font-medium hover:underline">{book.title}</a>
+        <span class="text-muted"> by {book.author}</span>
+        {book.yearPublished && (
+          <span class="text-muted/60 text-sm"> ({book.yearPublished})</span>
+        )}
+      </h3>
+    </div>
+
+    <!-- Rating & Date -->
+    <div class="flex items-center gap-4 sm:flex-shrink-0">
+      {book.myRating > 0 ? (
+        <span class="text-charcoal text-sm tracking-wide" title={`${book.myRating} stars`}>
+          {stars}
+        </span>
+      ) : (
+        <span class="font-sans text-xs text-muted">Unrated</span>
+      )}
+      {book.dateRead && (
+        <time class="font-sans text-xs text-muted whitespace-nowrap">
+          {formatShortDate(book.dateRead)}
+        </time>
+      )}
+    </div>
+  </div>
+
+  <!-- Review -->
+  {hasReview && (
+    <div class="mt-3">
+      {isLongReview ? (
+        <div class="review-container">
+          <p class="text-sm text-muted leading-relaxed review-text" data-truncated={truncatedReview} data-full={reviewText}>
+            {truncatedReview}
+          </p>
+          <button class="read-more-btn font-sans text-xs text-accent hover:underline mt-1">
+            Read more
+          </button>
+        </div>
+      ) : (
+        <p class="text-sm text-muted leading-relaxed">
+          {reviewText}
+        </p>
+      )}
+    </div>
+  )}
+</article>

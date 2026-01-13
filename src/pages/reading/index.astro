@@ -1,0 +1,191 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BookCard from '../../components/BookCard.astro';
+import BookListItem from '../../components/BookListItem.astro';
+import { getFeaturedBooks, getAllBooks } from '../../lib/books';
+
+const featuredBooks = getFeaturedBooks(6);
+const allBooks = getAllBooks();
+const remainingBooks = allBooks.filter(
+  book => !featuredBooks.some(f => f.id === book.id)
+);
+---
+
+<BaseLayout
+  title="Reading"
+  description="Books I've read with honest reviews - explorations in memoir, fiction, and self-discovery."
+>
+  <section class="py-16 lg:py-24">
+    <div class="container">
+      <!-- Header -->
+      <div class="max-w-3xl mb-12 lg:mb-16">
+        <p class="font-sans text-sm tracking-widest uppercase text-muted mb-4">
+          Reading
+        </p>
+        <h1 class="text-4xl lg:text-5xl font-serif font-medium text-charcoal leading-tight">
+          What I'm Reading
+        </h1>
+        <p class="mt-6 text-lg text-muted leading-relaxed">
+          Books that have shaped my thinking on identity, creativity, and the courage
+          to live authentically. These reviews are my honest, unfiltered thoughts.
+          <a href="#all-books" class="link">Browse all {allBooks.length} books →</a>
+        </p>
+      </div>
+
+      <!-- Featured Books Section -->
+      {featuredBooks.length > 0 && (
+        <div class="mb-16 lg:mb-24">
+          <h2 class="text-xl font-serif font-medium text-charcoal mb-8">
+            Recently Read
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {featuredBooks.map((book, index) => (
+              <BookCard book={book} index={index + 1} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Full Book List -->
+      {remainingBooks.length > 0 && (
+        <div id="all-books" class="scroll-mt-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 class="text-xl font-serif font-medium text-charcoal">
+              All Books
+              <span class="ml-2 font-sans text-sm font-normal text-muted">
+                (<span id="visible-count">{allBooks.length}</span> total)
+              </span>
+            </h2>
+
+            <!-- Search & Filter -->
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                id="book-search"
+                placeholder="Search books..."
+                class="px-4 py-2 text-sm border border-border bg-cream rounded-none focus:outline-none focus:border-charcoal transition-colors"
+              />
+              <select
+                id="rating-filter"
+                class="px-4 py-2 text-sm border border-border bg-cream rounded-none focus:outline-none focus:border-charcoal transition-colors text-muted"
+              >
+                <option value="all">All ratings</option>
+                <option value="5">5 stars only</option>
+                <option value="4">4+ stars</option>
+                <option value="3">3+ stars</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="books-list" class="border-t border-border">
+            {remainingBooks.map((book) => (
+              <BookListItem book={book} />
+            ))}
+          </div>
+
+          <p id="no-results" class="hidden py-8 text-center text-muted">
+            No books found matching your search.
+          </p>
+        </div>
+      )}
+
+      <!-- Empty State -->
+      {allBooks.length === 0 && (
+        <div class="text-center py-16">
+          <svg class="w-12 h-12 mx-auto text-border mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <p class="text-muted text-lg">
+            No books added yet. Check back soon!
+          </p>
+        </div>
+      )}
+
+      <!-- Footer Note -->
+      <div class="mt-16 pt-12 border-t border-border text-center">
+        <p class="text-sm text-muted">
+          Cover images courtesy of
+          <a
+            href="https://openlibrary.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link"
+          >
+            Open Library
+          </a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+
+<script>
+  // Read more toggle
+  document.querySelectorAll('.read-more-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const container = this.closest('.review-container');
+      const textEl = container?.querySelector('.review-text');
+      if (!textEl) return;
+
+      const isExpanded = textEl.getAttribute('data-expanded') === 'true';
+
+      if (isExpanded) {
+        textEl.textContent = textEl.getAttribute('data-truncated') || '';
+        textEl.setAttribute('data-expanded', 'false');
+        this.textContent = 'Read more';
+      } else {
+        textEl.textContent = textEl.getAttribute('data-full') || '';
+        textEl.setAttribute('data-expanded', 'true');
+        this.textContent = 'Show less';
+      }
+    });
+  });
+
+  // Search and filter
+  const searchInput = document.getElementById('book-search');
+  const ratingFilter = document.getElementById('rating-filter');
+  const booksList = document.getElementById('books-list');
+  const visibleCount = document.getElementById('visible-count');
+  const noResults = document.getElementById('no-results');
+
+  function filterBooks() {
+    const searchTerm = searchInput?.value.toLowerCase() || '';
+    const minRating = ratingFilter?.value || 'all';
+    const books = booksList?.querySelectorAll('.book-item') || [];
+
+    let visible = 0;
+
+    books.forEach(book => {
+      const title = book.getAttribute('data-title') || '';
+      const author = book.getAttribute('data-author') || '';
+      const rating = parseInt(book.getAttribute('data-rating') || '0');
+
+      const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
+      const matchesRating = minRating === 'all' || rating >= parseInt(minRating);
+
+      if (matchesSearch && matchesRating) {
+        (book as HTMLElement).style.display = '';
+        visible++;
+      } else {
+        (book as HTMLElement).style.display = 'none';
+      }
+    });
+
+    if (visibleCount) visibleCount.textContent = String(visible);
+    if (noResults) {
+      noResults.classList.toggle('hidden', visible > 0);
+    }
+    if (booksList) {
+      (booksList as HTMLElement).classList.toggle('hidden', visible === 0);
+    }
+  }
+
+  searchInput?.addEventListener('input', filterBooks);
+  ratingFilter?.addEventListener('change', filterBooks);
+</script>

@@ -15,3 +15,14 @@ export interface PodcastEpisode {
   duration?: string;
   audioUrl?: string;
 }
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  myRating: number;
+  averageRating?: number;
+  yearPublished?: number;
+  dateRead?: string;
+  review?: string;
+}

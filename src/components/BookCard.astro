@@ -1,0 +1,134 @@
+---
+import type { Book } from '../lib/types';
+import { formatShortDate, truncateReview, getAmazonSearchUrl } from '../lib/books';
+
+interface Props {
+  book: Book;
+  index: number;
+}
+
+const { book, index } = Astro.props;
+const reviewExcerpt = truncateReview(book.review, 200);
+const amazonUrl = getAmazonSearchUrl(book.title, book.author);
+---
+
+<article class="group h-full">
+  <div class="h-full flex flex-col">
+    <!-- Cover Image -->
+    <div
+      class="book-cover aspect-[2/3] bg-surface overflow-hidden mb-4"
+      data-title={book.title}
+      data-author={book.author}
+    >
+      <div class="w-full h-full flex items-center justify-center">
+        <div class="text-center px-4">
+          <svg class="w-10 h-10 mx-auto text-border" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span class="mt-2 block font-serif text-sm text-muted line-clamp-2">{book.title}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Title & Author -->
+      <h3 class="text-base lg:text-lg font-serif leading-snug">
+        <span class="text-charcoal">{index}. </span>
+        <a href={amazonUrl} target="_blank" rel="noopener noreferrer" class="text-accent font-medium hover:underline">{book.title}</a>
+      </h3>
+      <p class="mt-1 font-sans text-sm text-muted">
+        by {book.author}{book.yearPublished && ` (${book.yearPublished})`}
+      </p>
+
+      <!-- Date & Rating -->
+      <p class="mt-2 font-sans text-xs tracking-widest uppercase text-muted">
+        {book.dateRead && (
+          <>
+            {formatShortDate(book.dateRead)}
+            <span class="mx-1">·</span>
+          </>
+        )}
+        {book.myRating > 0 ? `${book.myRating} Stars` : 'Unrated'}
+      </p>
+
+      <!-- Review Excerpt -->
+      {reviewExcerpt && (
+        <p class="mt-3 text-sm text-muted leading-relaxed line-clamp-4 flex-1">
+          {reviewExcerpt}
+        </p>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  // Client-side script to fetch and load book covers from Google Books API
+  async function loadBookCovers() {
+    const bookCovers = document.querySelectorAll('.book-cover');
+
+    for (const coverEl of bookCovers) {
+      const title = coverEl.getAttribute('data-title');
+      const author = coverEl.getAttribute('data-author');
+
+      if (!title) continue;
+
+      try {
+        // Search Google Books API for the book
+        const query = encodeURIComponent(`${title} ${author || ''}`);
+        const searchUrl = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`;
+
+        const response = await fetch(searchUrl);
+        if (!response.ok) continue;
+
+        const json = await response.json();
+
+        if (json.items && json.items.length > 0 && json.items[0].volumeInfo) {
+          const imageLinks = json.items[0].volumeInfo.imageLinks;
+          if (imageLinks && imageLinks.thumbnail) {
+            // Get thumbnail and upgrade to higher res
+            let coverUrl = imageLinks.thumbnail;
+            // Force HTTPS and request larger image
+            coverUrl = coverUrl.replace('http://', 'https://');
+            coverUrl = coverUrl.replace('zoom=1', 'zoom=0');
+            coverUrl = coverUrl.replace('&edge=curl', '');
+
+            // Create and load image
+            const img = document.createElement('img');
+            img.src = coverUrl;
+            img.alt = `Cover of ${title}`;
+            img.className = 'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105';
+
+            img.onload = function() {
+              coverEl.innerHTML = '';
+              coverEl.appendChild(img);
+            };
+          }
+        }
+      } catch (e) {
+        // Silently fail, keep placeholder
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadBookCovers);
+  } else {
+    loadBookCovers();
+  }
+</script>
